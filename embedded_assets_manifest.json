@@ -1,0 +1,9 @@
+{
+  "asset_id": "31971892-db4e-5a94-8e80-fa4cf0beca5a",
+  "path": "assets/40-I-C-005-006-figure.jpg",
+  "expected_sha256": "2551e345ef01bf35bb960bf8a5e8f385c0c48318f71a0d6a73138f4b11abc16d",
+  "expected_size_bytes": 79620,
+  "expected_width": 574,
+  "expected_height": 375,
+  "materialization_status": "pending_exact_base64_materialization"
+}

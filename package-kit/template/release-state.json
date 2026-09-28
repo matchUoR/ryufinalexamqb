@@ -1,0 +1,20 @@
+{
+  "booklets": {
+    "99-I-本試-A": {
+      "release_id": "c32dd9bb-c1a6-4643-917a-aefce8b633cc",
+      "revision": 1,
+      "supersedes_release_id": null,
+      "sha256": "7c5f256668feee6d34a7bc21027c081daf719a85bc6d7dda9c557b9cf599854c",
+      "booklet_id": "99-I-本試-A",
+      "path": "catalog/booklets/99-I-本試-A.json",
+      "required_common_release_id": "42532972-7063-4e2f-a1ed-49b29e9b7da5"
+    }
+  },
+  "common": {
+    "common_release_id": "42532972-7063-4e2f-a1ed-49b29e9b7da5",
+    "revision": 1,
+    "supersedes_common_release_id": null,
+    "sha256": "ca4b95f27fed72ccbe7d18daa5134b8ba77c516470cc0cdd86bb028d8eb18a1b",
+    "path": "catalog/common.json"
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "schema_version": "4.0-booklet-json",
+  "booklet_id": "99-I-本試-A",
+  "exam_id": "99-I-本試",
+  "booklet": "A",
+  "exams": [
+    {
+      "試験ID": "99-I-本試",
+      "期": 99,
+      "試験種別": "I",
+      "試験区分": "本試",
+      "実施日": null
+    }
+  ],
+  "questions": [
+    {
+      "question_id": "de52e8de-f167-43ff-bd0a-fbfd0c582883",
+      "問題ID": "de52e8de-f167-43ff-bd0a-fbfd0c582883",
+      "question_code": "99-I-本試-A-001",
+      "問題コード": "99-I-本試-A-001",
+      "exam_id": "99-I-本試",
+      "試験ID": "99-I-本試",
+      "term": 99,
+      "session_no": "I",
+      "exam_type": "本試",
+      "booklet": "A",
+      "冊子区分": "A",
+      "question_number": 1,
+      "問題番号": 1,
+      "exam_half": "前半",
+      "exam_day": null,
+      "exam_date": null,
+      "display_label": "記入例：99期I本試・前半 第1問",
+      "question_revision_id": "80f254c3-00ef-4c07-9ed6-4268175081dd",
+      "answer_version_id": "3c2c58a1-6e60-4656-9d17-699702213e6c",
+      "問題本文": "【記入例】原本の問題本文を入力。推測で補わない。",
+      "設問文": "【記入例】原本の問いかけを入力。",
+      "追加提示情報": null,
+      "連問ID": null,
+      "連問内順序": null,
+      "選択肢": [
+        {
+          "記号": "a",
+          "本文": "【記入例】選択肢a",
+          "表示順": 1
+        },
+        {
+          "記号": "b",
+          "本文": "【記入例】選択肢b",
+          "表示順": 2
+        },
+        {
+          "記号": "c",
+          "本文": "【記入例】選択肢c",
+          "表示順": 3
+        },
+        {
+          "記号": "d",
+          "本文": "【記入例】選択肢d",
+          "表示順": 4
+        },
+        {
+          "記号": "e",
+          "本文": "【記入例】選択肢e",
+          "表示順": 5
+        }
+      ],
+      "教室解答（採用版）": [],
+      "解答候補": [],
+      "解答確認状態": "未確認",
+      "指定選択数": null,
+      "設問形式": "未確認",
+      "設問の肯否": "未確認",
+      "採点注記": "正答未確認のため採点保留",
+      "grading_rule": {
+        "type": "hold",
+        "accepted_sets": [],
+        "required_selection_count": null,
+        "order_sensitive": false,
+        "partial_credit": false,
+        "authority": "未確認",
+        "review_status": "原本と教室回答の照合待ち",
+        "hold_reason": "記入例"
+      },
+      "校正状態": "記入例・原本未照合",
+      "出典資料": {
+        "出典資料ID": "SOURCE-QUESTION",
+        "PDFページ一覧": []
+      },
+      "解答出典資料": {
+        "出典資料ID": "SOURCE-ANSWER",
+        "PDFページ一覧": []
+      },
+      "question_category": null,
+      "category_confirmation_status": "unclassified",
+      "category_question_revision_id": "80f254c3-00ef-4c07-9ed6-4268175081dd",
+      "departments": [],
+      "diseases": [],
+      "themes": [],
+      "症例診断名": [],
+      "評価対象能力": "",
+      "intent": {
+        "content_status": "pending",
+        "category": "未分類",
+        "sections": [],
+        "source_kind": "未作成",
+        "question_revision_id": "80f254c3-00ef-4c07-9ed6-4268175081dd",
+        "visibility": "after_answer"
+      },
+      "explanation": {
+        "content_status": "pending",
+        "summary": "",
+        "options": [
+          {
+            "label": "a",
+            "is_key": null,
+            "reason": "",
+            "confirmation_status": "未確認"
+          },
+          {
+            "label": "b",
+            "is_key": null,
+            "reason": "",
+            "confirmation_status": "未確認"
+          },
+          {
+            "label": "c",
+            "is_key": null,
+            "reason": "",
+            "confirmation_status": "未確認"
+          },
+          {
+            "label": "d",
+            "is_key": null,
+            "reason": "",
+            "confirmation_status": "未確認"
+          },
+          {
+            "label": "e",
+            "is_key": null,
+            "reason": "",
+            "confirmation_status": "未確認"
+          }
+        ],
+        "reference_ids": [],
+        "source_kind": "未作成",
+        "confirmation_status": "未確認",
+        "question_revision_id": "80f254c3-00ef-4c07-9ed6-4268175081dd",
+        "visibility": "after_answer",
+        "evidence_status": "source_unverified"
+      },
+      "学習要点": [],
+      "source_image_presence": "unknown",
+      "asset_ids": [],
+      "related_questions": [],
+      "same_question_group": null,
+      "same_question_search_status": "not_assessed_across_exams",
+      "template_example": true
+    }
+  ],
+  "serial_groups": [],
+  "asset_bindings": []
+}

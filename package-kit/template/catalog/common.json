@@ -1,0 +1,204 @@
+{
+  "schema_version": "4.0-booklet-json",
+  "department_master": [
+    {
+      "department_id": "01",
+      "name": "産婦人科"
+    },
+    {
+      "department_id": "02",
+      "name": "消化器"
+    },
+    {
+      "department_id": "03",
+      "name": "肝胆膵"
+    },
+    {
+      "department_id": "04",
+      "name": "耳鼻咽喉科"
+    },
+    {
+      "department_id": "05",
+      "name": "整形外科"
+    },
+    {
+      "department_id": "06",
+      "name": "中毒"
+    },
+    {
+      "department_id": "07",
+      "name": "眼科"
+    },
+    {
+      "department_id": "08",
+      "name": "感染症"
+    },
+    {
+      "department_id": "09",
+      "name": "救急"
+    },
+    {
+      "department_id": "10",
+      "name": "皮膚科"
+    },
+    {
+      "department_id": "11",
+      "name": "放射線科"
+    },
+    {
+      "department_id": "12",
+      "name": "精神科"
+    },
+    {
+      "department_id": "13",
+      "name": "神経内科、神経外科"
+    },
+    {
+      "department_id": "14",
+      "name": "腎泌尿器"
+    },
+    {
+      "department_id": "15",
+      "name": "医学一般"
+    },
+    {
+      "department_id": "16",
+      "name": "呼吸器"
+    },
+    {
+      "department_id": "17",
+      "name": "循環器"
+    },
+    {
+      "department_id": "18",
+      "name": "小児科"
+    },
+    {
+      "department_id": "19",
+      "name": "代謝・内分泌"
+    },
+    {
+      "department_id": "20",
+      "name": "免疫・膠原病"
+    },
+    {
+      "department_id": "21",
+      "name": "血液内科"
+    },
+    {
+      "department_id": "22",
+      "name": "公衆衛生"
+    },
+    {
+      "department_id": "23",
+      "name": "麻酔科"
+    }
+  ],
+  "booklet_classification": {
+    "I": {
+      "A": {
+        "exam_type": "本試",
+        "exam_half": "前半",
+        "exam_day": null
+      },
+      "B": {
+        "exam_type": "本試",
+        "exam_half": "後半",
+        "exam_day": null
+      },
+      "C": {
+        "exam_type": "追試",
+        "exam_half": "前半",
+        "exam_day": null
+      },
+      "D": {
+        "exam_type": "追試",
+        "exam_half": "後半",
+        "exam_day": null
+      }
+    },
+    "II": {
+      "A": {
+        "exam_type": "本試",
+        "exam_half": "前半",
+        "exam_day": 1
+      },
+      "B": {
+        "exam_type": "本試",
+        "exam_half": "後半",
+        "exam_day": 1
+      },
+      "C": {
+        "exam_type": "本試",
+        "exam_half": "前半",
+        "exam_day": 2
+      },
+      "D": {
+        "exam_type": "本試",
+        "exam_half": "後半",
+        "exam_day": 2
+      },
+      "E": {
+        "exam_type": "追試",
+        "exam_half": "前半",
+        "exam_day": null
+      },
+      "F": {
+        "exam_type": "追試",
+        "exam_half": "後半",
+        "exam_day": null
+      }
+    },
+    "III": {
+      "A": {
+        "exam_type": "本試",
+        "exam_half": "前半",
+        "exam_day": 1
+      },
+      "B": {
+        "exam_type": "本試",
+        "exam_half": "後半",
+        "exam_day": 1
+      },
+      "C": {
+        "exam_type": "本試",
+        "exam_half": "前半",
+        "exam_day": 2
+      },
+      "D": {
+        "exam_type": "本試",
+        "exam_half": "後半",
+        "exam_day": 2
+      },
+      "E": {
+        "exam_type": "追試",
+        "exam_half": "前半",
+        "exam_day": null
+      },
+      "F": {
+        "exam_type": "追試",
+        "exam_half": "後半",
+        "exam_day": null
+      }
+    }
+  },
+  "disease_master": [],
+  "sources": [
+    {
+      "出典資料ID": "SOURCE-QUESTION",
+      "ファイル名": "問題.pdf",
+      "種別": "問題原本"
+    },
+    {
+      "出典資料ID": "SOURCE-ANSWER",
+      "ファイル名": "教室回答.pdf",
+      "種別": "教室回答"
+    }
+  ],
+  "assets": [],
+  "references": [],
+  "omitted_questions": [],
+  "open_issues": [
+    "これは記入例です。実際の問題を転記してから読み込んでください。"
+  ]
+}

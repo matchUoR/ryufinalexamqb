@@ -1,0 +1,20 @@
+{
+  "title": "新しい試験の問題パッケージ",
+  "creator": {
+    "name": "作成者名を入力",
+    "device_name": ""
+  },
+  "package_version": "1.0.0",
+  "description": "問題PDFと教室回答PDFから作成",
+  "sources": [
+    {
+      "filename": "問題.pdf",
+      "role": "question_pdf"
+    },
+    {
+      "filename": "教室回答.pdf",
+      "role": "classroom_answer_pdf"
+    }
+  ],
+  "template_example": true
+}

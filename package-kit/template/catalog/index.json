@@ -1,0 +1,10 @@
+{
+  "schema_version": "4.0-booklet-json",
+  "common": "common.json",
+  "booklets": [
+    {
+      "booklet_id": "99-I-本試-A",
+      "file": "booklets/99-I-本試-A.json"
+    }
+  ]
+}
