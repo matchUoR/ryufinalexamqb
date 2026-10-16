@@ -6,7 +6,31 @@ window.PackageManager=(()=>{
  async function refresh(){const box=$('web-packages');box.replaceChildren();const ps=await WebStore.list();ps.sort((a,b)=>$('web-sort').value==='title'?a.title.localeCompare(b.title,'ja',{numeric:true}):a.registeredAt.localeCompare(b.registeredAt));if($('web-direction').value==='desc')ps.reverse();for(const p of ps){const card=document.createElement('article');card.className='web-package-card';const title=document.createElement('strong');title.textContent=p.title;const detail=document.createElement('p');detail.textContent=p.questionCount+'問 / '+p.books.length+'冊子 / '+p.manifest.package_version;const button=document.createElement('button');button.className='secondary';button.textContent='削除';button.disabled=busy||running();button.onclick=async()=>{if(busy||running())return;if(!confirm(`「${p.title}」の問題と画像をこのiPadから削除します。学習履歴は残り、同じ問題IDを再取り込みすると引き継げます。削除しますか？`))return;busy=true;try{await WebStore.remove(p.id);changed=true;say('削除しました。学習履歴は保持しています。')}catch(e){say('削除できません：'+e.message)}finally{busy=false;refresh()}};card.append(title,detail,button);box.append(card)}if(!ps.length)box.textContent='パッケージはありません。冊子ZIPを取り込んでください。'}
  async function show(){if(running()){alert('試験を終了してから問題パッケージを操作してください。');return}await WebStore.flush().catch(()=>{});await refresh();$('web-package-dialog').showModal()}
  async function close(){if(busy)return;say('');if(changed){try{await WebStore.reload()}catch(e){say('保存待ちです：'+e.message)}}else $('web-package-dialog').close()}
- async function importFiles(){if(busy||running())return;const files=[...$('web-files').files];if(!files.length){say('冊子ZIPを選んでください');return}busy=true;$('web-import').disabled=true;await refresh();const results=[];try{await navigator.storage?.persist?.().catch(()=>false);for(const file of files){try{const item=await PackageReader.read(file,s=>say(file.name+'：'+s));const all=await WebStore.list();const conflicts=all.filter(p=>p.id===item.record.id||p.title.normalize('NFKC').toLowerCase()===item.record.title.normalize('NFKC').toLowerCase()||p.books.some(b=>item.record.books.some(x=>x.booklet_id===b.booklet_id)));if(conflicts.length>1)throw Error('複数の登録と重複しています。対象を確認して削除後に取り込んでください。');let replace=null;if(conflicts.length){const old=conflicts[0];if(!confirm(`「${old.title}」が登録済みです。書き換えますか？\n学習履歴は保持します。キャンセルでこのZIPを取り込みません。`)){results.push(file.name+'：キャンセル');continue}replace=old.id;item.record.registeredAt=old.registeredAt}await WebStore.putPackage(item.record,item.blobs,replace);changed=true;results.push(file.name+'：取り込み完了')}catch(e){results.push(file.name+'：失敗 — '+e.message)}}}finally{busy=false;$('web-import').disabled=false;say(results.join('\n'));await refresh();$('web-files').value=''}}
+ async function importFiles(){
+  if(busy||running())return;
+  const files=[...$('web-files').files];if(!files.length){say('冊子ZIPまたはまとめZIPを選んでください');return}
+  busy=true;$('web-import').disabled=true;$('web-files').disabled=true;
+  const results=[];
+  try{
+   await refresh();await navigator.storage?.persist?.().catch(()=>false);
+   for(const file of files){try{
+    results.push(...await PackageReader.importArchive(file,async(item)=>{
+     const all=await WebStore.list();
+     const conflicts=all.filter(p=>p.id===item.record.id||p.title.normalize('NFKC').toLowerCase()===item.record.title.normalize('NFKC').toLowerCase()||p.books.some(b=>item.record.books.some(x=>x.booklet_id===b.booklet_id)));
+     if(conflicts.length>1)throw Error('複数の登録と重複しています。対象を確認して削除後に取り込んでください。');
+     let replace=null;
+     if(conflicts.length){const old=conflicts[0];if(!confirm(`「${old.title}」が登録済みです。書き換えますか？\n学習履歴は保持します。キャンセルでこの冊子をスキップします。`))return 'skipped';replace=old.id;item.record.registeredAt=old.registeredAt}
+     await WebStore.putPackage(item.record,item.blobs,replace);changed=true;return 'imported';
+    },say));
+   }catch(e){results.push({name:file.name,status:'failed',message:e.message})}}
+  }finally{
+   busy=false;$('web-import').disabled=false;$('web-files').disabled=false;
+   const count=status=>results.filter(x=>x.status===status).length;
+   say(`取り込み完了 ${count('imported')}冊／スキップ ${count('skipped')}冊／失敗 ${count('failed')}件\n`+results.map(r=>r.name+'：'+({imported:'取り込み完了',skipped:'スキップ',failed:'失敗 — '+r.message}[r.status])).join('\n'));
+   await refresh();$('web-files').value='';
+  }
+ }
+
  function init(){
   $('open-packages').onclick=show;$('web-close-packages').onclick=close;$('web-package-dialog').addEventListener('cancel',e=>{e.preventDefault();close()});$('web-import').onclick=importFiles;$('web-sort').onchange=refresh;$('web-direction').onchange=refresh;
   $('web-backup').onclick=async()=>{try{const data=await WebStore.backup();download(data,'学習進捗_'+new Date().toISOString().replace(/[:.]/g,'-')+'.json');$('web-backup-note').textContent='保存操作を開始しました。「ファイル」で保存済みか確認してください。問題ZIPも別途保管してください。'}catch(e){$('web-backup-note').textContent='バックアップできません：'+e.message}};

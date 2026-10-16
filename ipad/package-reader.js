@@ -4,11 +4,11 @@ window.PackageReader=(()=>{
  const path=s=>{check(typeof s==='string'&&s&&!s.startsWith('/')&&!s.includes('\\')&&!s.includes('\0')&&!s.split('/').some(x=>!x||x==='.'||x==='..'),'ZIP内のパスが不正です');return s};
  const hash=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
  const uuid=s=>typeof s==='string'&&/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(s);
- function directory(bytes){const v=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);let end=-1;for(let i=bytes.length-22;i>=Math.max(0,bytes.length-65557);i--)if(v.getUint32(i,true)===0x06054b50&&i+22+v.getUint16(i+20,true)===bytes.length){end=i;break}check(end>=0,'ZIPを読み取れません');check(v.getUint16(end+4,true)===0&&v.getUint16(end+6,true)===0,'分割ZIPは非対応です');const count=v.getUint16(end+10,true);check(count===v.getUint16(end+8,true)&&count<=2000,'ZIP内のファイル数が多すぎます');let pos=v.getUint32(end+16,true),size=v.getUint32(end+12,true),total=0;check(pos+size===end,'ZIP64または不正なZIPです');const names=new Map(),decode=new TextDecoder('utf-8',{fatal:true});for(let i=0;i<count;i++){
+ function directory(bytes,maxFile=MAX_FILE,maxTotal=MAX_TOTAL){const v=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);let end=-1;for(let i=bytes.length-22;i>=Math.max(0,bytes.length-65557);i--)if(v.getUint32(i,true)===0x06054b50&&i+22+v.getUint16(i+20,true)===bytes.length){end=i;break}check(end>=0,'ZIPを読み取れません');check(v.getUint16(end+4,true)===0&&v.getUint16(end+6,true)===0,'分割ZIPは非対応です');const count=v.getUint16(end+10,true);check(count===v.getUint16(end+8,true)&&count<=2000,'ZIP内のファイル数が多すぎます');let pos=v.getUint32(end+16,true),size=v.getUint32(end+12,true),total=0;check(pos+size===end,'ZIP64または不正なZIPです');const names=new Map(),decode=new TextDecoder('utf-8',{fatal:true});for(let i=0;i<count;i++){
   check(pos+46<=end&&v.getUint32(pos,true)===0x02014b50,'ZIP一覧が不正です');const flags=v.getUint16(pos+8,true),method=v.getUint16(pos+10,true),compressed=v.getUint32(pos+20,true),expanded=v.getUint32(pos+24,true),n=v.getUint16(pos+28,true),extra=v.getUint16(pos+30,true),comment=v.getUint16(pos+32,true),attrs=v.getUint32(pos+38,true),local=v.getUint32(pos+42,true);
-  check(!(flags&1)&&[0,8].includes(method),'暗号化または非対応圧縮です');check(pos+46+n+extra+comment<=end,'ZIP一覧が不正です');const name=decode.decode(bytes.subarray(pos+46,pos+46+n));path(name.replace(/\/$/,''));check(!names.has(name),'ZIP内に同名ファイルがあります');check(((attrs>>>16)&0xf000)!==0xa000,'リンクファイルは取り込めません');check(expanded<=MAX_FILE&&compressed<=100*MB,'ファイルが大きすぎます');total+=expanded;check(total<=MAX_TOTAL,'展開後300MBを超えています');check(local+30<=bytes.length&&v.getUint32(local,true)===0x04034b50,'ZIP本体が不正です');const ln=v.getUint16(local+26,true),le=v.getUint16(local+28,true);check(decode.decode(bytes.subarray(local+30,local+30+ln))===name,'ZIPのファイル名が一致しません');check(local+30+ln+le+compressed<=v.getUint32(end+16,true),'ZIPデータ範囲が不正です');names.set(name,{expanded,dir:name.endsWith('/')});pos+=46+n+extra+comment;
+  check(!(flags&1)&&[0,8].includes(method),'暗号化または非対応圧縮です');check(pos+46+n+extra+comment<=end,'ZIP一覧が不正です');const name=decode.decode(bytes.subarray(pos+46,pos+46+n));path(name.replace(/\/$/,''));check(!names.has(name),'ZIP内に同名ファイルがあります');check(((attrs>>>16)&0xf000)!==0xa000,'リンクファイルは取り込めません');check(expanded<=maxFile&&compressed<=maxFile*2,'ファイルが大きすぎます');total+=expanded;check(total<=maxTotal,'展開後の合計サイズ上限を超えています');check(local+30<=bytes.length&&v.getUint32(local,true)===0x04034b50,'ZIP本体が不正です');const ln=v.getUint16(local+26,true),le=v.getUint16(local+28,true);check(decode.decode(bytes.subarray(local+30,local+30+ln))===name,'ZIPのファイル名が一致しません');check(local+30+ln+le+compressed<=v.getUint32(end+16,true),'ZIPデータ範囲が不正です');names.set(name,{expanded,dir:name.endsWith('/')});pos+=46+n+extra+comment;
  }check(pos===end,'ZIP一覧サイズが一致しません');return {names,total};}
- function bounded(file,expected){return new Promise((resolve,reject)=>{let size=0;const chunks=[],stream=file.internalStream('uint8array');stream.on('data',chunk=>{size+=chunk.length;if(size>expected||size>MAX_FILE){stream.pause();reject(Error('展開サイズが申告と一致しません'));return}chunks.push(chunk)}).on('error',reject).on('end',()=>{if(size!==expected)return reject(Error('ファイルサイズが不一致です'));const out=new Uint8Array(size);let at=0;for(const c of chunks){out.set(c,at);at+=c.length}resolve(out)}).resume()})}
+ function bounded(file,expected,limit=MAX_FILE){return new Promise((resolve,reject)=>{let size=0;const chunks=[],stream=file.internalStream('uint8array');stream.on('data',chunk=>{size+=chunk.length;if(size>expected||size>limit){stream.pause();reject(Error('展開サイズが申告と一致しません'));return}chunks.push(chunk)}).on('error',reject).on('end',()=>{if(size!==expected)return reject(Error('ファイルサイズが不一致です'));const out=new Uint8Array(size);let at=0;for(const c of chunks){out.set(c,at);at+=c.length}resolve(out)}).resume()})}
  function validImage(bytes,mime,p){const start=String.fromCharCode(...bytes.slice(0,12));check(mime==='image/jpeg'?bytes[0]===255&&bytes[1]===216&&bytes[2]===255&&/\.jpe?g$/i.test(p):mime==='image/png'?start.startsWith('\x89PNG\r\n\x1a\n')&&/\.png$/i.test(p):mime==='image/webp'?start.startsWith('RIFF')&&start.slice(8)==='WEBP'&&/\.webp$/i.test(p):false,'画像の種類・拡張子・内容が一致しません')}
  function validate(common,books){
   for(const field of ['assets','department_master','disease_master'])check(Array.isArray(common[field]),'共通データが不正です：'+field);
@@ -26,7 +26,7 @@ window.PackageReader=(()=>{
  }
  async function read(file,progress=()=>{}){check(file.size<=100*MB,'ZIPは100MB以内です');progress('ZIPを確認中');const bytes=new Uint8Array(await file.arrayBuffer()),dir=directory(bytes),zip=await JSZip.loadAsync(bytes,{createFolders:false}),files=new Map();
   for(const [n,info]of dir.names)if(!info.dir){const z=zip.file(n);check(z&&(!z.unsafeOriginalName||z.unsafeOriginalName===n),'ZIPのパスが不正です');files.set(n,z)}
-  check(files.has('manifest.json')&&files.has('catalog/index.json')&&files.has('catalog/common.json'),'問題パッケージZIPではありません。まとめZIPの場合は展開し、中の冊子ZIPを選んでください。');check(dir.names.get('manifest.json').expanded<=2*MB,'manifestが大きすぎます');
+  check(files.has('manifest.json')&&files.has('catalog/index.json')&&files.has('catalog/common.json'),'問題パッケージZIPではありません。まとめZIPの入れ子は1階層までです。');check(dir.names.get('manifest.json').expanded<=2*MB,'manifestが大きすぎます');
   const decode=b=>JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(b));const m=decode(await bounded(files.get('manifest.json'),dir.names.get('manifest.json').expanded));
   check(m.format==='exam-study-package'&&m.format_version===1&&m.content_schema==='4.0-booklet-json'&&Number.isInteger(m.min_reader_version)&&m.min_reader_version<=1&&m.catalog_path==='catalog/index.json','対応していない形式です');check(uuid(m.package_id)&&typeof m.title==='string'&&m.title.trim()&&typeof m.creator?.name==='string'&&m.creator.name.trim()&&typeof m.creator.device_name==='string','タイトル・作成者・IDが不正です');check(Array.isArray(m.files),'ファイル一覧が不正です');const declared=new Set(),json=new Map(),blobs=new Map();let size=0;
   for(const rec of m.files){const name=path(rec.path);check(name!=='manifest.json'&&!declared.has(name)&&files.has(name),'ファイルが不足または重複しています');declared.add(name);check(['catalog/index.json','catalog/common.json'].includes(name)||/^catalog\/booklets\/[^/]+\.json$/.test(name)||name.startsWith('assets/'),'許可されない配置です');check(rec.bytes===dir.names.get(name).expanded,'申告サイズが不一致です');progress('検査中：'+name);const raw=await bounded(files.get(name),rec.bytes);check(await hash(raw)===rec.sha256,'SHA-256が不一致です：'+name);size+=raw.length;
@@ -39,5 +39,38 @@ window.PackageReader=(()=>{
   const count=books.reduce((n,b)=>n+b.questions.length,0);check(m.counts?.questions===count&&m.counts.booklets===books.length&&m.counts.assets===new Set(common.assets.map(a=>a.sha256)).size,'件数が不一致です');
   return {record:{id:m.package_id,title:m.title.trim(),manifest:m,common,books,assetPaths:[...blobs.keys()],registeredAt:new Date().toISOString(),questionCount:count},blobs};
  }
- return {read,validate,hash};
+ // A bundle holds child ZIPs; process each fully before expanding the next.
+ async function importArchive(file,consume,progress=()=>{}){
+  check(file.size<=300*MB,'まとめZIPは300MB以内です。分割して取り込んでください。');
+  let bytes=new Uint8Array(await file.arrayBuffer());
+  const dir=directory(bytes,100*MB,600*MB);
+  if(dir.names.has('manifest.json')){bytes=null;return [await importOne(file,file.name,consume,progress)]}
+  const zip=await JSZip.loadAsync(bytes,{createFolders:false});bytes=null;
+  const candidates=[...dir.names].filter(([n,v])=>!v.dir&&!n.split('/').some(x=>x==='__MACOSX'||x.startsWith('._'))&&/\.zip$/i.test(n));
+  check(candidates.length>0,'冊子ZIPが見つかりません。問題パッケージ、または冊子ZIPをまとめたZIPを選んでください。');
+  check(candidates.length<=100,'まとめZIP内の冊子ZIPは100個以内です。');
+  const results=[];let expandedTotal=0;
+  for(let i=0;i<candidates.length;i++){
+   const [name,info]=candidates[i],label=file.name+' / '+name;
+   progress(`冊子 ${i+1}/${candidates.length}：${name}`);
+   try{
+    const entry=zip.file(name);check(entry&&(!entry.unsafeOriginalName||entry.unsafeOriginalName===name),'ZIPのパスが不正です');
+    let raw=await bounded(entry,info.expanded,100*MB);
+    const childDir=directory(raw);
+    check(childDir.names.has('manifest.json'),'まとめZIPの入れ子は1階層までです。中身は冊子ZIPにしてください。');
+    expandedTotal+=childDir.total;check(expandedTotal<=600*MB,'冊子の展開後合計が600MBを超えます。残りは別途取り込んでください。');
+    const child=new File([raw],name,{type:'application/zip'});raw=null;
+    results.push(await importOne(child,label,consume,progress));
+   }catch(e){results.push({name:label,status:'failed',message:e.message})}
+   // Release the completed child from JSZip's directory (the outer bytes remain bounded).
+   zip.remove(name);
+  }
+  return results;
+ }
+ async function importOne(file,name,consume,progress){try{
+  const item=await read(file,s=>progress(name+'：'+s));
+  const status=await consume(item,name);
+  return {name,status:status==='skipped'?'skipped':'imported'};
+ }catch(e){return {name,status:'failed',message:e.message}}}
+ return {read,validate,hash,importArchive};
 })();
