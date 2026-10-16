@@ -1,0 +1,7 @@
+(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.ExamRichText=api;})(globalThis,function(){
+const allowed=new Set(['B','STRONG','SUP','SUB','I','EM','U','BR']);
+function escape(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+// Parse only inert template content, then create a new tree of allowed, attribute-free elements.
+function render(value){const input=document.createElement('template');input.innerHTML=String(value??'');const out=document.createElement('div');function walk(source,target){for(const n of source.childNodes){if(n.nodeType===3)target.append(document.createTextNode(n.textContent));else if(n.nodeType===1){if(['SCRIPT','STYLE','IFRAME','OBJECT','TEMPLATE'].includes(n.tagName))continue;const el=allowed.has(n.tagName)?document.createElement(n.tagName.toLowerCase()):document.createDocumentFragment();walk(n,el);target.append(el)}}}walk(input.content,out);return out.innerHTML}
+function plain(value){if(typeof document!=='undefined'){const box=document.createElement('div');box.innerHTML=render(value);box.querySelectorAll('br').forEach(x=>x.replaceWith('\n'));return box.textContent}return String(value??'').replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi,'').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'').replace(/&(?:amp|lt|gt|quot|#39);/g,x=>({'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&#39;':"'"}[x]))}
+return {render,plain,escape};});
